@@ -1,4 +1,4 @@
-module backend
+module github.com/joe5saia/cautious-memory
 
 go 1.21.5
 

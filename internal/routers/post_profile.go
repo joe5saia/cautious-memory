@@ -4,20 +4,23 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 
-	"internal/schemas"
+	"github.com/joe5saia/cautious-memory/internal/schemas"
 )
 
-func postAlbums(c *gin.Context) {
+func postProfile(c *gin.Context, db *gorm.DB) {
 	var newProfile schemas.Profile
 
 	// Call BindJSON to bind the received JSON to
-	// newAlbum.
 	if err := c.BindJSON(&newProfile); err != nil {
 		return
 	}
 
-	// Add the new album to the slice.
-	albums = append(albums, newProfile)
-	c.IndentedJSON(http.StatusCreated, newProfile)
+	// Write the new profile to the database
+	if err := db.Create(&newProfile).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 }

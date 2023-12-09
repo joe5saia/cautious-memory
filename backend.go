@@ -1,8 +1,10 @@
 package main
 
 import (
-	"backend/internal/models"
 	"log"
+
+	"github.com/gin-gonic/gin"
+	"github.com/joe5saia/cautious-memory/internal/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -11,6 +13,12 @@ import (
 func main() {
 	db := setupDatabase()
 	db.AutoMigrate(&models.Profile{}, &models.SubField{})
+
+	router := gin.Default()
+
+	router.GET("/profiles/:id", routers.postProfile(db))
+
+	router.Run(":8080")
 }
 
 func setupDatabase() *gorm.DB {
@@ -20,4 +28,7 @@ func setupDatabase() *gorm.DB {
 		log.Fatal("Failed to connect to database:", err)
 	}
 	return db
+}
+
+func setupRouter() {
 }
