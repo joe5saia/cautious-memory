@@ -10,6 +10,5 @@ type SubField struct {
 	gorm.Model
 	Id        uuid.UUID `gorm:"primaryKey;type:uuid;default:gen_random_uuid()"` // primary key
 	Name      string    `json:"name"`
-	ProfileId uuid.UUID `gorm:"type:uuid"`                                      // Foreign key referencing Profile
-	Profile   Profile   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"` // Adding a reference to Profile
+	ProfileId uuid.UUID `json:"profileId" gorm:"type:uuid;foreignKey:Id;references:ProfileId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }

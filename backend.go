@@ -15,9 +15,7 @@ func main() {
 	db := setupDatabase()
 	db.AutoMigrate(&models.Profile{}, &models.SubField{})
 
-	router := gin.Default()
-
-	router.GET("/profiles/:id", routers.GetProfile(db))
+	router := setupRouter(db)
 
 	router.Run(":8080")
 }
@@ -31,5 +29,13 @@ func setupDatabase() *gorm.DB {
 	return db
 }
 
-func setupRouter() {
+func setupRouter(db *gorm.DB) *gin.Engine {
+	router := gin.Default()
+	router.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "pong"})
+	})
+	router.POST("/profiles", routers.PostProfile(db))
+	router.GET("/profiles", routers.GetProfiles(db))
+	router.Run(":8080")
+	return router
 }

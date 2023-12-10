@@ -1,12 +1,10 @@
 package schemas
 
+import "github.com/google/uuid"
+
 /*
 profile struct for the api representing the full profile json object
 */
-
-import (
-	"github.com/google/uuid"
-)
 
 // Profile struct
 type Profile struct {
