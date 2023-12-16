@@ -33,8 +33,15 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
+	// array of models
+	models := []interface{}{
+		&model.Profile{},
+		&model.Subfield{},
+		&model.Field{},
+	}
+
 	// AutoMigrate models
-	db.AutoMigrate(&model.Profile{}, &model.Subfield{})
+	db.AutoMigrate(models...)
 
 	// Initialize store
 	store := store.NewStore(db)

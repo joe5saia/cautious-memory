@@ -6,11 +6,11 @@ import (
 
 type Profile struct {
 	gorm.Model
-	FirstName   string
-	LastName    string
-	Email       string
+	FirstName   string `gorm:"not null"`
+	LastName    string `gorm:"not null"`
+	Email       string `gorm:"unique;not null"`
 	PhoneNumber string
 	School      string
-	Field       string
+	Fields      []Field    `gorm:"many2many:profile_fields;"`
 	Subfields   []Subfield `gorm:"many2many:profile_subfields;"`
 }
