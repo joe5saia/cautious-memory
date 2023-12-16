@@ -5,7 +5,7 @@ import (
 )
 
 type Profile struct {
-	gorm.Model
+	gorm.Model  `json:"-"`
 	FirstName   string `gorm:"not null"`
 	LastName    string `gorm:"not null"`
 	Email       string `gorm:"unique;not null"`

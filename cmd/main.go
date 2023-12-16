@@ -2,19 +2,42 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/joe5saia/cautious-memory/internal/handler"
-	"github.com/joe5saia/cautious-memory/internal/model"
-	"github.com/joe5saia/cautious-memory/internal/store"
-
 	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
+	docs "github.com/joe5saia/cautious-memory/docs"
+	"github.com/joe5saia/cautious-memory/internal/handler"
+	"github.com/joe5saia/cautious-memory/internal/model"
+	"github.com/joe5saia/cautious-memory/internal/store"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
+// gin-swagger middleware
+// swagger embed files
+
+//	@title			Swagger Example API
+//	@version		1.0
+//	@description	This is a sample server celler server.
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@host		localhost:8080
+//	@BasePath	/api/v1
+
+//	@securityDefinitions.basic	BasicAuth
+
+// @externalDocs.description	OpenAPI
+// @externalDocs.url			https://swagger.io/resources/open-api/
 func main() {
 	dbHost := os.Getenv("POSTGRES_HOSTNAME")
 	dbPort := os.Getenv("POSTGRES_PORT")
@@ -24,6 +47,7 @@ func main() {
 
 	// Initialize Gin router
 	router := gin.Default()
+	docs.SwaggerInfo.BasePath = "/api/v1"
 
 	// Set up database connection
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", dbHost, dbUser, dbPass, dbName, dbPort)
@@ -50,16 +74,36 @@ func main() {
 	profileHandler := handler.NewProfileHandler(store)
 	subfieldHandler := handler.NewSubfieldHandler(store)
 
-	// Set up routes
-	router.GET("/profiles", profileHandler.GetAllProfiles)
-	router.GET("/profile/:id", profileHandler.GetProfile)
-	router.POST("/profile", profileHandler.CreateProfile)
-	router.POST("/profile/:id", profileHandler.UpdateProfile)
-	router.GET("/subfields", subfieldHandler.GetAllSubfields)
-	router.GET("/subfield/:id", subfieldHandler.GetSubfield)
-	router.DELETE("/subfield/:id", subfieldHandler.DeleteSubfield)
-	router.POST("/subfield", subfieldHandler.CreateSubfield)
-	router.POST("/subfield/:id", subfieldHandler.UpdateSubfield)
+	v1 := router.Group("/api/v1")
+	{
+		v1.GET("/", func(c *gin.Context) {
+			c.JSON(200, gin.H{
+				"message": "Welcome to the API!",
+			})
+		})
+		// Group all the profile routes
+		profileRoutes := v1.Group("profiles")
+		{
+			profileRoutes.GET("/", profileHandler.GetAllProfiles)
+			profileRoutes.GET("/:id", profileHandler.GetProfile)
+			profileRoutes.POST("/", profileHandler.CreateProfile)
+			profileRoutes.POST("/:id", profileHandler.UpdateProfile)
+			profileRoutes.DELETE("/:id", profileHandler.DeleteProfile)
+		}
+		// Group all the subfield routes
+		subfieldRoutes := v1.Group("subfields")
+		{
+			subfieldRoutes.GET("/", subfieldHandler.GetAllSubfields)
+			subfieldRoutes.GET("/:id", subfieldHandler.GetSubfield)
+			subfieldRoutes.POST("/", subfieldHandler.CreateSubfield)
+			subfieldRoutes.POST("/:id", subfieldHandler.UpdateSubfield)
+			subfieldRoutes.DELETE("/:id", subfieldHandler.DeleteSubfield)
+		}
+
+	}
+
+	// Set up Gin Swagger
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Run the server
 	router.Run(":8080")
